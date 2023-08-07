@@ -156,8 +156,24 @@ class Navigator:
 
         :return:           The raw bytes of the attribute
         """
-            
-        pass
+        
+        # The offset to the first attribute is stored at offset 0x14 in the MFT entry.
+        attr_start = self.__unpack(data[0x14:0x16])
+
+        # Loop through each attribute until either the end of the MFT entry is reached or the
+        # attribute with the given ID is found.
+        while attr_start < self.bytes_per_entry:
+
+            attr_end = attr_start + self.__unpack(data[attr_start + 4:attr_start + 8])
+
+            attr = data[attr_start:attr_end]
+
+            if self.__unpack(attr[0:4]) ==  0xFFFFFFFF: break
+            if self.__unpack(attr[0:4]) == attribute: return attr
+
+            attr_start = attr_end    
+
+        raise Exception('Attribute not found')
 
 
     def __parseFileNameAttribute(self, data: bytes) -> str:
