@@ -143,7 +143,19 @@ class Navigator:
         :return:      The raw MFT entry
         """
 
-        pass
+        entries_per_cluster = self.bytes_per_cluster // self.bytes_per_entry
+
+        # The cluster number the entry is in, and the byte offset of the entry in the cluster
+        # print(entry, entries_per_cluster)
+        cluster_number = self.mft_sectors[entry // entries_per_cluster]
+        cluster_offset = (entry % entries_per_cluster) * self.bytes_per_entry
+
+        # The byte offset of the MFT entry from the beginning of the file
+        byte_offset = (cluster_number * self.bytes_per_cluster) + cluster_offset
+
+        file.seek(byte_offset)
+        return file.read(self.bytes_per_entry)
+
 
 
     def __getRawAttribute(self, data: bytes, attribute: int) -> bytes:
