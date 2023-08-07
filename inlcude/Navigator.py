@@ -199,7 +199,7 @@ class Navigator:
 
         content_offset = self.__unpack(data[0x14:0x16])
         attribute_content = data[content_offset:]
-
+        
         return bytes.decode(attribute_content[66 : 66 + (attribute_content[64] * 2)], "utf-16-le")
 
 
@@ -212,7 +212,15 @@ class Navigator:
         :return:     A dictionary containing the reparse tag and the reparse data
         """
 
-        pass
+        content_offset = self.__unpack(data[0x14:0x16])
+        attribute_content = data[content_offset:]
+
+        reparse_data_length = self.__unpack(attribute_content[4:8])
+
+        return {
+            "reparse_tag": attribute_content[0:4],
+            "reparse_data": attribute_content[8:8 + reparse_data_length]
+        }
 
     
     def getEntry(self, entry: int) -> dict[str, bytes]:
