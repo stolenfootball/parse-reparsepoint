@@ -75,7 +75,34 @@ class Navigator:
         :return:        A list of sectors that the file spans
         """
 
-        pass
+        sector_list = []
+        offset = 0
+
+        # Continue processing until 0x00 is reached.  This marks the end of the runlist.
+        while runlist[0] != 0x00:
+
+            # The number of bytes in the offset and length fields are stored in the first byte. The
+            # upper 4 bits are the number of bytes in the offset and the lower 4 bits are the number
+            # of bytes in the length.
+            offset_length = runlist[0] >> 4
+            length_length = runlist[0] & 0x0F
+
+            # The number of conseutive sectors in the run
+            length = self.__unpack(runlist[1 : length_length + 1], signed=True)
+
+            # The offset of the start of the current run from the start of the previous run.  Since
+            # the start of the current run can be before than the start of the previous run, the offset
+            # is signed.
+            offset = offset + self.__unpack(
+                runlist[length_length + 1 : length_length + 1 + offset_length], signed=True
+            )
+
+            # Add the sectors in the current run to the list of sectors
+            for i in range(length):
+                sector_list.append(offset + i)
+            runlist = runlist[length_length + 1 + offset_length :]
+
+        return sector_list
     
 
     def __getMFTSectors(self, file: BinaryIO) -> list[int]:
