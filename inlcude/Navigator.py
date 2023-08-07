@@ -12,7 +12,22 @@ class Navigator:
         :param file_name: The name of the file to parse
         """
         
-        pass
+        with open(file_name, 'r') as file:
+
+            self.file_name = file_name
+
+            file.seek(0)
+            boot = file.read(512)
+
+            bytes_per_sector = self.__unpack(boot[11:13])
+            sectors_per_cluster = self.__unpack(boot[13:14])
+            mft_starting_cluster = self.__unpack(boot[48:56])
+
+            self.bytes_per_cluster = bytes_per_sector * sectors_per_cluster
+            self.bytes_per_entry = 1024
+            self.mft_byte_offset = mft_starting_cluster * sectors_per_cluster * bytes_per_sector
+
+            self.mft_sectors = self.__getMFTSectors(file)
 
     
     def __unpack(self, data: bytes, byteorder='little', signed=False) -> int:
