@@ -12,7 +12,7 @@ class Navigator:
         :param file_name: The name of the file to parse
         """
         
-        with open(file_name, 'r') as file:
+        with open(file_name, 'rb') as file:
 
             self.file_name = file_name
 
@@ -114,7 +114,23 @@ class Navigator:
         :return:     A list of sectors that the MFT spans
         """
 
-        pass
+        file.seek(self.mft_byte_offset)
+        raw_mft_entry = file.read(self.bytes_per_entry)
+
+        # The first 4 bytes of the MFT entry are the signature.  If the signature is not 'FILE', then
+        # the MFT is corrupt.
+        if raw_mft_entry[0:4] != b'FILE':
+            raise Exception('MFT is corrupt')
+        
+        mft_entry = self.__applyFixup(raw_mft_entry)
+
+        # The runlist is contained in the data attribute.  The data attribute has an ID of 0x80.
+        data_attribute = self.__getRawAttribute(mft_entry, 0x80)
+
+        # The sectors that the MFT spans are stored in the runlist.  The offset to the runlist is stored
+        # at offset 0x20 in the MFT entry.
+        offset_to_runlist = self.__unpack(data_attribute[0x20:0x22])
+        return self.__parseRunlist(data_attribute[offset_to_runlist:])
 
 
     def __getRawMFTEntry(self, file: BinaryIO, entry: int) -> bytes:
