@@ -54,7 +54,16 @@ class Navigator:
         :return:     The data with the fixup applied
         """
 
-        pass
+        offset_to_fixup = self.__unpack(data[4:6])
+        num_fixup_entries = self.__unpack(data[6:8])
+
+        fixup = data[offset_to_fixup + 2 : offset_to_fixup + 2 * num_fixup_entries]
+
+        data_bytes = bytearray(data)
+        for i in range(num_fixup_entries):
+            data_bytes[(512 * i) - 2 : (512 * i)] = fixup[(2 * i) : (2 * i) + 2]
+
+        return bytes(data)
     
 
     def __parseRunlist(self, runlist: bytes) -> list[int]:
