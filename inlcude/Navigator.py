@@ -197,7 +197,10 @@ class Navigator:
         :return:     The file name
         """
 
-        pass
+        content_offset = self.__unpack(data[0x14:0x16])
+        attribute_content = data[content_offset:]
+
+        return bytes.decode(attribute_content[66 : 66 + (attribute_content[64] * 2)], "utf-16-le")
 
 
     def __parseReparseAttribute(self, data: bytes) -> dict[str, bytes]:
