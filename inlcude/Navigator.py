@@ -42,7 +42,7 @@ class Navigator:
         :return:          The unpacked integer
         """
 
-        pass
+        return int.from_bytes(data, byteorder=byteorder, signed=signed)
     
 
     def __applyFixup(self, data: bytes) -> bytes:
