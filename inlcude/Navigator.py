@@ -236,6 +236,15 @@ class Navigator:
         :return:      The data obtained from the entry
         """
 
-        pass
+        with open(self.file_name, "rb") as file:
+            entry_bytes = self.__getRawMFTEntry(file, entry)
+
+        reparse_attribute = self.__getRawAttribute(entry_bytes, 0xC0)
+        reparse_data = self.__parseReparseAttribute(reparse_attribute)
+
+        file_attribute = self.__getRawAttribute(entry_bytes, 0x30)
+        reparse_data["file_name"] = self.__parseFileNameAttribute(file_attribute)
+
+        return reparse_data
     
 
