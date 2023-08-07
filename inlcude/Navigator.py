@@ -157,7 +157,6 @@ class Navigator:
         return file.read(self.bytes_per_entry)
 
 
-
     def __getRawAttribute(self, data: bytes, attribute: int) -> bytes:
         """
         Loops through each attribute in the MFT entry and returns the raw bytes 
@@ -247,4 +246,3 @@ class Navigator:
 
         return reparse_data
     
-
