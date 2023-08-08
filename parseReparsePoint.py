@@ -1,4 +1,5 @@
 from inlcude.Navigator import Navigator
+from inlcude.Interpreter import Interpreter
 
 import argparse
 
@@ -11,7 +12,11 @@ def main():
 
     try:
         navigator = Navigator(args.file)
-        print(navigator.getEntry(args.mft_entry))
+        info = navigator.getEntry(args.mft_entry)
+       
+        interpreter = Interpreter(info)
+        interpreter.printAllInfo()
+
     except Exception as ex:
         print(ex)
         return
