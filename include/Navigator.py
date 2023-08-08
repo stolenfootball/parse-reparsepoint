@@ -1,5 +1,6 @@
 from typing import BinaryIO
 
+
 class Navigator:
 
     def __init__(self, file_name: str):
@@ -11,9 +12,8 @@ class Navigator:
 
         :param file_name: The name of the file to parse
         """
-        
-        with open(file_name, 'rb') as file:
 
+        with open(file_name, "rb") as file:
             self.file_name = file_name
 
             file.seek(0)
@@ -25,12 +25,14 @@ class Navigator:
 
             self.bytes_per_cluster = bytes_per_sector * sectors_per_cluster
             self.bytes_per_entry = 1024
-            self.mft_byte_offset = mft_starting_cluster * sectors_per_cluster * bytes_per_sector
+            self.mft_byte_offset = (
+                mft_starting_cluster * sectors_per_cluster * bytes_per_sector
+            )
 
             self.mft_sectors = self.__getMFTSectors(file)
 
-    
-    def __unpack(self, data: bytes, byteorder='little', signed=False) -> int:
+
+    def __unpack(self, data: bytes, byteorder="little", signed=False) -> int:
         """
         Unpacks the given bytes into an integer.  This is a wrapper for the int.from_bytes() method
         with default values for byteorder and signed.
@@ -43,11 +45,11 @@ class Navigator:
         """
 
         return int.from_bytes(data, byteorder=byteorder, signed=signed)
-    
+
 
     def __applyFixup(self, data: bytes) -> bytes:
         """
-        Applies the NTFS fixup to the given data.  
+        Applies the NTFS fixup to the given data.
 
         :param data: The data to apply the fixup to
 
@@ -64,7 +66,7 @@ class Navigator:
             data_bytes[(512 * i) - 2 : (512 * i)] = fixup[(2 * i) : (2 * i) + 2]
 
         return bytes(data)
-    
+
 
     def __parseRunlist(self, runlist: bytes) -> list[int]:
         """
@@ -80,7 +82,6 @@ class Navigator:
 
         # Continue processing until 0x00 is reached.  This marks the end of the runlist.
         while runlist[0] != 0x00:
-
             # The number of bytes in the offset and length fields are stored in the first byte. The
             # upper 4 bits are the number of bytes in the offset and the lower 4 bits are the number
             # of bytes in the length.
@@ -94,7 +95,8 @@ class Navigator:
             # the start of the current run can be before than the start of the previous run, the offset
             # is signed.
             offset = offset + self.__unpack(
-                runlist[length_length + 1 : length_length + 1 + offset_length], signed=True
+                runlist[length_length + 1 : length_length + 1 + offset_length],
+                signed=True,
             )
 
             # Add the sectors in the current run to the list of sectors
@@ -103,7 +105,7 @@ class Navigator:
             runlist = runlist[length_length + 1 + offset_length :]
 
         return sector_list
-    
+
 
     def __getMFTSectors(self, file: BinaryIO) -> list[int]:
         """
@@ -119,9 +121,9 @@ class Navigator:
 
         # The first 4 bytes of the MFT entry are the signature.  If the signature is not 'FILE', then
         # the MFT is corrupt.
-        if raw_mft_entry[0:4] != b'FILE':
-            raise Exception('MFT is corrupt - signature is not \'FILE\'.')
-        
+        if raw_mft_entry[0:4] != b"FILE":
+            raise Exception("MFT is corrupt - signature is not 'FILE'.")
+
         mft_entry = self.__applyFixup(raw_mft_entry)
 
         # The runlist is contained in the data attribute.  The data attribute has an ID of 0x80.
@@ -159,7 +161,7 @@ class Navigator:
 
     def __getRawAttribute(self, data: bytes, attribute: int) -> bytes:
         """
-        Loops through each attribute in the MFT entry and returns the raw bytes 
+        Loops through each attribute in the MFT entry and returns the raw bytes
         of the attribute with the given ID.
 
         :param data:       The MFT entry to parse
@@ -167,24 +169,25 @@ class Navigator:
 
         :return:           The raw bytes of the attribute
         """
-        
+
         # The offset to the first attribute is stored at offset 0x14 in the MFT entry.
         attr_start = self.__unpack(data[0x14:0x16])
 
         # Loop through each attribute until either the end of the MFT entry is reached or the
         # attribute with the given ID is found.
         while attr_start < self.bytes_per_entry:
-
-            attr_end = attr_start + self.__unpack(data[attr_start + 4:attr_start + 8])
+            attr_end = attr_start + self.__unpack(data[attr_start + 4 : attr_start + 8])
 
             attr = data[attr_start:attr_end]
 
-            if self.__unpack(attr[0:4]) ==  0xFFFFFFFF: break
-            if self.__unpack(attr[0:4]) == attribute: return attr
+            if self.__unpack(attr[0:4]) == 0xFFFFFFFF:
+                break
+            if self.__unpack(attr[0:4]) == attribute:
+                return attr
 
-            attr_start = attr_end    
+            attr_start = attr_end
 
-        raise Exception('Attribute not found')
+        raise Exception("Attribute not found")
 
 
     def __parseFileNameAttribute(self, data: bytes) -> str:
@@ -198,8 +201,10 @@ class Navigator:
 
         content_offset = self.__unpack(data[0x14:0x16])
         attribute_content = data[content_offset:]
-        
-        return bytes.decode(attribute_content[66 : 66 + (attribute_content[64] * 2)], "utf-16-le")
+
+        return bytes.decode(
+            attribute_content[66 : 66 + (attribute_content[64] * 2)], "utf-16-le"
+        )
 
 
     def __parseReparseAttribute(self, data: bytes) -> dict[str, bytes]:
@@ -218,10 +223,10 @@ class Navigator:
 
         return {
             "reparse_tag": attribute_content[0:4],
-            "reparse_data": attribute_content[8:8 + reparse_data_length]
+            "reparse_data": attribute_content[8 : 8 + reparse_data_length],
         }
 
-    
+
     def getEntry(self, entry: int) -> dict[str, bytes]:
         """
         Gets the entry from the MFT and parses attribute agnostic information from it.
@@ -242,13 +247,12 @@ class Navigator:
             reparse_attribute = self.__getRawAttribute(entry_bytes, 0xC0)
             reparse_data = self.__parseReparseAttribute(reparse_attribute)
         except:
-            raise Exception('File is not a reparse point')
+            raise Exception("File is not a reparse point")
 
         try:
             file_attribute = self.__getRawAttribute(entry_bytes, 0x30)
             reparse_data["file_name"] = self.__parseFileNameAttribute(file_attribute)
         except:
-            raise Exception('File name attribute not found')
+            raise Exception("File name attribute not found")
 
         return reparse_data
-    
