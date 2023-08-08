@@ -1,3 +1,5 @@
+import re
+import string
 
 class Interpreter:
 
@@ -68,6 +70,35 @@ class Interpreter:
 
         self.reparse_data = reparse_data
         self.tag = int.from_bytes(reparse_data["reparse_tag"], "little")
+        self.account_type = "Unknown"
+
+
+    def __pull_regex(self, raw_data: bytes, regex_str: str) -> str:
+        """
+        Take a raw byte string and return anything that matches the compiled regex string.
+        Ignore all non-printable characters and whitespace.
+
+        :param raw_data: The raw byte string to convert
+        :param regex_str: The regex string to use
+
+        :return: A string with the regex match
+        """
+
+        # Convert bytes to string and remove all non-printable characters
+        str_raw = raw_data.decode('utf-8', 'ignore')
+        all_ascii = ''.join(filter(lambda x: x in string.printable, str_raw))
+
+        # Remove all whitespace
+        str = ''.join(all_ascii.split())
+
+        # Search for the regex
+        regex = re.compile(regex_str)
+        res = re.search(regex, str)
+
+        if not res: 
+            raise ValueError("Regex not found in byte string")
+        
+        return res.group()
 
 
     def resolveReparseTag(self) -> str:
@@ -91,7 +122,24 @@ class Interpreter:
         :return: A human-readable string with the OneDrive CID.
         """
 
-        pass
+        if self.tag & 0xFFFF0FFF != 0x9000001A:
+            raise ValueError("Not a OneDrive reparse point")
+        
+        try:
+            self.account_type = "OneDrive Business"
+
+            guid_regex = "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+            return f"OneDrive CID: {self.__pull_regex(self.reparse_data['reparse_data'], guid_regex)}"
+        
+        except ValueError:
+            self.account_type = "OneDrive Personal"
+
+            pers_regex = "[0-9A-F]{16}!"
+            return f"OneDrive CID: {self.__pull_regex(self.reparse_data['reparse_data'], pers_regex)}"
+
+        except:
+            return f"OneDrive CID: Unable to resolve"
+        
 
 
     def resolveSymLinkInfo(self) -> str:
