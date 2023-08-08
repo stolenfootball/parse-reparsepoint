@@ -70,7 +70,6 @@ class Interpreter:
 
         self.reparse_data = reparse_data
         self.tag = int.from_bytes(reparse_data["reparse_tag"], "little")
-        self.account_type = "Unknown"
 
 
     def __pull_regex(self, raw_data: bytes, regex_str: str) -> str:
@@ -110,9 +109,14 @@ class Interpreter:
         """
 
         try:
-            return f"TAG 0x{self.tag:08x} -> {self.REPARSE_TAG_INFO[self.tag][0]}: {self.REPARSE_TAG_INFO[self.tag][1]}"
+            return { "Tag Value": f"0x{self.tag:08x}",
+                     "Tag Identity": self.REPARSE_TAG_INFO[self.tag][0],
+                     "Tag Desctiption": self.REPARSE_TAG_INFO[self.tag][1] }
+        
         except KeyError:
-            return f"TAG 0x{self.tag:08x} (Unknown tag)"
+            return { "Tag Value": f"0x{self.tag:08x}",
+                     "Tag Identity": "UNKNOWN",
+                     "Tag Description": "No description available." }
 
 
     def resolveOneDriveInfo(self) -> str:
@@ -126,19 +130,20 @@ class Interpreter:
             raise ValueError("Not a OneDrive reparse point")
         
         try:
-            self.account_type = "OneDrive Business"
-
             guid_regex = "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
-            return f"OneDrive CID: {self.__pull_regex(self.reparse_data['reparse_data'], guid_regex)}"
+
+            return { "OneDrive CID": self.__pull_regex(self.reparse_data['reparse_data'], guid_regex),
+                     "OneDrive Account Type": "OneDrive Business" }
         
         except ValueError:
-            self.account_type = "OneDrive Personal"
-
             pers_regex = "[0-9A-F]{16}!"
-            return f"OneDrive CID: {self.__pull_regex(self.reparse_data['reparse_data'], pers_regex)}"
+
+            return { "OneDrive CID": self.__pull_regex(self.reparse_data['reparse_data'], pers_regex),
+                     "OneDrive Account Type": "OneDrive Business" }
 
         except:
-            return f"OneDrive CID: Unable to resolve"
+            return { "OneDrive CID": "Unable to resolve OneDrive CID",
+                     "OneDrive Account Type": "Unknown" }
         
 
 
@@ -166,7 +171,11 @@ class Interpreter:
         substitute_name = self.reparse_data["reparse_data"][substitute_name_offset:substitute_name_offset+substitute_name_length].decode("utf-16")
         print_name = self.reparse_data["reparse_data"][print_name_offset:print_name_offset+print_name_length].decode("utf-16")
 
-        return f"Flag info: {flag_value}\nSubstitute name: {substitute_name}\nPrint name: {print_name}"
+        return {
+            "Substitute Name": substitute_name,
+            "Print Name": print_name,
+            "Flag Info": flag_value
+        }
 
 
     def resolveMountPointInfo(self) -> str:
@@ -188,7 +197,10 @@ class Interpreter:
         substitute_name = self.reparse_data["reparse_data"][substitute_name_offset:substitute_name_offset+substitute_name_length].decode("utf-16")
         print_name = self.reparse_data["reparse_data"][print_name_offset:print_name_offset+print_name_length].decode("utf-16")
 
-        return f"Substitute name: {substitute_name}\nPrint name: {print_name}"
+        return {
+            "Substitute Name": substitute_name,
+            "Print Name": print_name
+        }
     
 
     def resolveAllInfo(self) -> str:
@@ -199,4 +211,13 @@ class Interpreter:
         :return: A human-readable string with all processed information.
         """
 
-        pass
+        info = self.resolveReparseTag()
+        
+        if self.tag & 0xFFFF0FFF == 0x9000001A:
+            info.update(self.resolveOneDriveInfo())
+        if self.tag == 0xA000000C:
+            info.update(self.resolveSymLinkInfo())
+        if self.tag == 0xA0000003:
+            info.update(self.resolveMountPointInfo())
+            
+        return info
