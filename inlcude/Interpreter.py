@@ -149,7 +149,24 @@ class Interpreter:
         :return: A human-readable string with the symlink target.
         """
 
-        pass
+        if self.tag  != 0xA000000C:
+            raise ValueError("Not a symbolic link reparse point")
+        
+        substitute_name_offset = int.from_bytes(self.reparse_data["reparse_data"][0:2], "little") + 12
+        substitute_name_length = int.from_bytes(self.reparse_data["reparse_data"][2:4], "little")
+
+        print_name_offset = int.from_bytes(self.reparse_data["reparse_data"][4:6], "little") + 12
+        print_name_length = int.from_bytes(self.reparse_data["reparse_data"][6:8], "little")
+
+        flag = int.from_bytes(self.reparse_data["reparse_data"][8:12], "little")
+        flag_value = "Substitute name is an absolute path name"
+        if flag:
+            flag_value = "Substitute name is a relative path name"
+
+        substitute_name = self.reparse_data["reparse_data"][substitute_name_offset:substitute_name_offset+substitute_name_length].decode("utf-16")
+        print_name = self.reparse_data["reparse_data"][print_name_offset:print_name_offset+print_name_length].decode("utf-16")
+
+        return f"Flag info: {flag_value}\nSubstitute name: {substitute_name}\nPrint name: {print_name}"
 
 
     def resolveMountPointInfo(self) -> str:
