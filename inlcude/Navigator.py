@@ -120,7 +120,7 @@ class Navigator:
         # The first 4 bytes of the MFT entry are the signature.  If the signature is not 'FILE', then
         # the MFT is corrupt.
         if raw_mft_entry[0:4] != b'FILE':
-            raise Exception('MFT is corrupt')
+            raise Exception('MFT is corrupt - signature is not \'FILE\'.')
         
         mft_entry = self.__applyFixup(raw_mft_entry)
 
@@ -238,11 +238,17 @@ class Navigator:
         with open(self.file_name, "rb") as file:
             entry_bytes = self.__getRawMFTEntry(file, entry)
 
-        reparse_attribute = self.__getRawAttribute(entry_bytes, 0xC0)
-        reparse_data = self.__parseReparseAttribute(reparse_attribute)
+        try:
+            reparse_attribute = self.__getRawAttribute(entry_bytes, 0xC0)
+            reparse_data = self.__parseReparseAttribute(reparse_attribute)
+        except:
+            raise Exception('File is not a reparse point')
 
-        file_attribute = self.__getRawAttribute(entry_bytes, 0x30)
-        reparse_data["file_name"] = self.__parseFileNameAttribute(file_attribute)
+        try:
+            file_attribute = self.__getRawAttribute(entry_bytes, 0x30)
+            reparse_data["file_name"] = self.__parseFileNameAttribute(file_attribute)
+        except:
+            raise Exception('File name attribute not found')
 
         return reparse_data
     
