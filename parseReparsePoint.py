@@ -14,6 +14,7 @@ def main():
         print(navigator.getEntry(args.mft_entry))
     except Exception as ex:
         print(ex)
+        return
 
 if __name__ == '__main__':
     main()
