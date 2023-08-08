@@ -138,8 +138,8 @@ class Interpreter:
         except ValueError:
             pers_regex = "[0-9A-F]{16}!"
 
-            return { "OneDrive CID": self.__pull_regex(self.reparse_data['reparse_data'], pers_regex),
-                     "OneDrive Account Type": "OneDrive Business" }
+            return { "OneDrive CID": self.__pull_regex(self.reparse_data['reparse_data'], pers_regex)[:-1],
+                     "OneDrive Account Type": "OneDrive Personal" }
 
         except:
             return { "OneDrive CID": "Unable to resolve OneDrive CID",
