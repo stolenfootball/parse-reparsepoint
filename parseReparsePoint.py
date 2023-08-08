@@ -1,5 +1,5 @@
-from inlcude.Navigator import Navigator
-from inlcude.Interpreter import Interpreter
+from include.Navigator import Navigator
+from include.Interpreter import Interpreter
 
 import argparse
 
