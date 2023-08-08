@@ -154,7 +154,7 @@ class Navigator:
         byte_offset = (cluster_number * self.bytes_per_cluster) + cluster_offset
 
         file.seek(byte_offset)
-        return file.read(self.bytes_per_entry)
+        return self.__applyFixup(file.read(self.bytes_per_entry))
 
 
     def __getRawAttribute(self, data: bytes, attribute: int) -> bytes:
