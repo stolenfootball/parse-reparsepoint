@@ -1,7 +1,7 @@
 import argparse
 
-from parseReparsePoint.Interpreter import Interpreter
-from parseReparsePoint.Navigator import Navigator
+from parsereparsepoint.Interpreter import Interpreter
+from parsereparsepoint.Navigator import Navigator
 
 
 def main():
