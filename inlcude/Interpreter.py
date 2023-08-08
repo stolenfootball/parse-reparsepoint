@@ -159,7 +159,19 @@ class Interpreter:
         :return: A human-readable string with the mount point.
         """
 
-        pass
+        if self.tag  != 0xA0000003:
+            raise ValueError("Not a mount point reparse point")
+        
+        substitute_name_offset = int.from_bytes(self.reparse_data["reparse_data"][0:2], "little") + 8
+        substitute_name_length = int.from_bytes(self.reparse_data["reparse_data"][2:4], "little")
+
+        print_name_offset = int.from_bytes(self.reparse_data["reparse_data"][4:6], "little") + 8
+        print_name_length = int.from_bytes(self.reparse_data["reparse_data"][6:8], "little")
+
+        substitute_name = self.reparse_data["reparse_data"][substitute_name_offset:substitute_name_offset+substitute_name_length].decode("utf-16")
+        print_name = self.reparse_data["reparse_data"][print_name_offset:print_name_offset+print_name_length].decode("utf-16")
+
+        return f"Substitute name: {substitute_name}\nPrint name: {print_name}"
     
 
     def resolveAllInfo(self) -> str:
