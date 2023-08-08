@@ -1,7 +1,7 @@
-from include.Navigator import Navigator
-from include.Interpreter import Interpreter
-
 import argparse
+
+from include.Interpreter import Interpreter
+from include.Navigator import Navigator
 
 
 def main():

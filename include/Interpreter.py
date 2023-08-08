@@ -8,15 +8,15 @@ class Interpreter:
     # https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fscc/c8e77b37-3909-4fe6-a4ea-2b9d423b1ee4
     REPARSE_TAG_INFO = {
         0x00000000: (
-            "IO_REPARSE_TAG_RESERVED_ZERO", 
+            "IO_REPARSE_TAG_RESERVED_ZERO",
             "Reserved reparse tag value"
         ),
         0x00000001: (
-            "IO_REPARSE_TAG_RESERVED_ONE", 
+            "IO_REPARSE_TAG_RESERVED_ONE",
             "Reserved reparse tag value"
         ),
         0x00000002: (
-            "IO_REPARSE_TAG_RESERVED_TWO", 
+            "IO_REPARSE_TAG_RESERVED_TWO",
             "Reserved reparse tag value"
         ),
         0xA0000003: (
@@ -28,7 +28,7 @@ class Interpreter:
             "Obsolete. Used by legacy Hierarchical Storage Manager Product",
         ),
         0x80000005: (
-            "IO_REPARSE_TAG_DRIVE_EXTENDER", 
+            "IO_REPARSE_TAG_DRIVE_EXTENDER",
             "Home server drive extender"
         ),
         0x80000006: (
@@ -40,7 +40,7 @@ class Interpreter:
             "Used by single-instance storage (SIS) filter driver",
         ),
         0x80000008: (
-            "IO_REPARSE_TAG_WIM", 
+            "IO_REPARSE_TAG_WIM",
             "Used by the WIM Mount filter"
         ),
         0x80000009: (
@@ -72,7 +72,7 @@ class Interpreter:
             "Used by the Data Deduplication (Dedup) filter",
         ),
         0xC0000014: (
-            "IO_REPARSE_TAG_APPXSTRM", 
+            "IO_REPARSE_TAG_APPXSTRM",
             "Not used"
         ),
         0x80000014: (
@@ -84,7 +84,7 @@ class Interpreter:
             "Obsolete. Used by Windows Shell for legacy placeholder files in Windows 8.1",
         ),
         0x80000016: (
-            "IO_REPARSE_TAG_DFM", 
+            "IO_REPARSE_TAG_DFM",
             "Used by the Dynamic File filter"
         ),
         0x80000017: (
@@ -192,7 +192,7 @@ class Interpreter:
             "Used by the Windows Container Isolation filter",
         ),
         0x80000021: (
-            "IO_REPARSE_TAG_ONEDRIVE", 
+            "IO_REPARSE_TAG_ONEDRIVE",
             "Not used"
         ),
         0xA0000022: (
@@ -386,7 +386,7 @@ class Interpreter:
         ].decode("utf-16")
 
         return {
-            "Substitute Name": substitute_name, 
+            "Substitute Name": substitute_name,
             "Print Name": print_name
         }
 
