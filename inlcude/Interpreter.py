@@ -212,6 +212,8 @@ class Interpreter:
         """
 
         info = self.resolveReparseTag()
+
+        info.update({ "File Name": self.reparse_data["file_name"] })
         
         if self.tag & 0xFFFF0FFF == 0x9000001A:
             info.update(self.resolveOneDriveInfo())
@@ -221,3 +223,18 @@ class Interpreter:
             info.update(self.resolveMountPointInfo())
             
         return info
+    
+
+    def printAllInfo(self) -> None:
+        """
+        Takes the reparse data, and prints a human-readable string with all information
+        able to be processed by this class.
+
+        :return: None
+        """
+
+        buf = 25
+
+        info = self.resolveAllInfo()
+        for key in info:
+            print(f"{key + ':' :<{buf}} {info[key]}")
