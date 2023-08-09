@@ -1,4 +1,5 @@
 from typing import BinaryIO
+from pathlib import Path
 
 
 class Navigator:
@@ -12,6 +13,9 @@ class Navigator:
 
         :param file_name: The name of the file to parse
         """
+
+        if not Path(file_name).exists():
+            raise OSError(f"[-] ERROR: No such file or directory: {file_name}")
 
         with open(file_name, "rb") as file:
             self.file_name = file_name
