@@ -295,7 +295,7 @@ class Interpreter:
         """
 
         if self.tag & 0xFFFF0FFF != 0x9000001A:
-            raise ValueError("Not a OneDrive reparse point")
+            raise ValueError("[-] ERROR: Not a OneDrive reparse point")
 
         try:
             guid_regex = "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
@@ -328,29 +328,41 @@ class Interpreter:
         """
 
         if self.tag != 0xA000000C:
-            raise ValueError("Not a symbolic link reparse point")
+            raise ValueError("[-] ERROR: Not a symbolic link reparse point")
 
-        # The substitute name is the computer readable target of the symlink
-        substitute_name_offset = int.from_bytes(self.reparse_data["reparse_data"][0:2], "little") + 12
-        substitute_name_length = int.from_bytes(self.reparse_data["reparse_data"][2:4], "little")
+        try:
+            # The substitute name is the computer readable target of the symlink
+            substitute_name_offset = int.from_bytes(self.reparse_data["reparse_data"][0:2], "little") + 12
+            substitute_name_length = int.from_bytes(self.reparse_data["reparse_data"][2:4], "little")
 
-        substitute_name = self.reparse_data["reparse_data"][
-            substitute_name_offset : substitute_name_offset + substitute_name_length
-        ].decode("utf-16")
+            substitute_name = self.reparse_data["reparse_data"][
+                substitute_name_offset : substitute_name_offset + substitute_name_length
+            ].decode("utf-16")
+        
+        except:
+            substitute_name = "Unable to parse subsitiute name"
 
-        # The print name is the human readable target of the symlink
-        print_name_offset = int.from_bytes(self.reparse_data["reparse_data"][4:6], "little") + 12
-        print_name_length = int.from_bytes(self.reparse_data["reparse_data"][6:8], "little")
+        try:
+            # The print name is the human readable target of the symlink
+            print_name_offset = int.from_bytes(self.reparse_data["reparse_data"][4:6], "little") + 12
+            print_name_length = int.from_bytes(self.reparse_data["reparse_data"][6:8], "little")
 
-        print_name = self.reparse_data["reparse_data"][
-            print_name_offset : print_name_offset + print_name_length
-        ].decode("utf-16")
+            print_name = self.reparse_data["reparse_data"][
+                print_name_offset : print_name_offset + print_name_length
+            ].decode("utf-16")
 
-        # The flag is a boolean value that determines if the substitute name is an absolute or relative path
-        flag = int.from_bytes(self.reparse_data["reparse_data"][8:12], "little")
-        flag_value = "Substitute name is an absolute path name"
-        if flag:
-            flag_value = "Substitute name is a relative path name"
+        except:
+            print_name = "Unable to parse print name"    
+
+        try:
+            # The flag is a boolean value that determines if the substitute name is an absolute or relative path
+            flag = int.from_bytes(self.reparse_data["reparse_data"][8:12], "little")
+            flag_value = "Substitute name is an absolute path name"
+            if flag:
+                flag_value = "Substitute name is a relative path name"
+
+        except:
+            flag_value = "Unable to parse flags"
 
         return {
             "Substitute Name": substitute_name,
@@ -367,23 +379,31 @@ class Interpreter:
         """
 
         if self.tag != 0xA0000003:
-            raise ValueError("Not a mount point reparse point")
+            raise ValueError("[-] ERROR: Not a mount point reparse point")
 
-        # The substitute name is the computer readable target of the mount point
-        substitute_name_offset = int.from_bytes(self.reparse_data["reparse_data"][0:2], "little") + 8
-        substitute_name_length = int.from_bytes(self.reparse_data["reparse_data"][2:4], "little")
+        try:
+            # The substitute name is the computer readable target of the mount point
+            substitute_name_offset = int.from_bytes(self.reparse_data["reparse_data"][0:2], "little") + 8
+            substitute_name_length = int.from_bytes(self.reparse_data["reparse_data"][2:4], "little")
 
-        substitute_name = self.reparse_data["reparse_data"][
-            substitute_name_offset : substitute_name_offset + substitute_name_length
-        ].decode("utf-16")
+            substitute_name = self.reparse_data["reparse_data"][
+                substitute_name_offset : substitute_name_offset + substitute_name_length
+            ].decode("utf-16")
 
-        # The print name is the human readable target of the mount point
-        print_name_offset = int.from_bytes(self.reparse_data["reparse_data"][4:6], "little") + 8
-        print_name_length = int.from_bytes(self.reparse_data["reparse_data"][6:8], "little")
+        except:
+            substitute_name = "Unable to parse subsitiute name"
 
-        print_name = self.reparse_data["reparse_data"][
-            print_name_offset : print_name_offset + print_name_length
-        ].decode("utf-16")
+        try:
+            # The print name is the human readable target of the mount point
+            print_name_offset = int.from_bytes(self.reparse_data["reparse_data"][4:6], "little") + 8
+            print_name_length = int.from_bytes(self.reparse_data["reparse_data"][6:8], "little")
+
+            print_name = self.reparse_data["reparse_data"][
+                print_name_offset : print_name_offset + print_name_length
+            ].decode("utf-16")
+        
+        except:
+            print_name = "Unable to parse print name"
 
         return {
             "Substitute Name": substitute_name,

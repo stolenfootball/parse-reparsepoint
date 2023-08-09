@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 
 from parsereparsepoint.Interpreter import Interpreter
 from parsereparsepoint.Navigator import Navigator
@@ -9,6 +10,10 @@ def main():
     parser.add_argument("-f", "--file", help="Path to file", type=str, required=True)
     parser.add_argument("-m", "--mft-entry", help="MFT entry to parse", type=int, required=True)
     args = parser.parse_args()
+
+    if not Path(args.file).exists():
+        print(f"[-] ERROR: No such file or directory: {args.file}")
+        return
 
     try:
         navigator = Navigator(args.file)

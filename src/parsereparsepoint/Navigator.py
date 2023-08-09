@@ -19,17 +19,20 @@ class Navigator:
             file.seek(0)
             boot = file.read(512)
 
-            bytes_per_sector = self.__unpack(boot[11:13])
-            sectors_per_cluster = self.__unpack(boot[13:14])
-            mft_starting_cluster = self.__unpack(boot[48:56])
+            try:
+                bytes_per_sector = self.__unpack(boot[11:13])
+                sectors_per_cluster = self.__unpack(boot[13:14])
+                mft_starting_cluster = self.__unpack(boot[48:56])
 
-            self.bytes_per_cluster = bytes_per_sector * sectors_per_cluster
-            self.bytes_per_entry = 1024
-            self.mft_byte_offset = (
-                mft_starting_cluster * sectors_per_cluster * bytes_per_sector
-            )
+                self.bytes_per_cluster = bytes_per_sector * sectors_per_cluster
+                self.bytes_per_entry = 1024
+                self.mft_byte_offset = (
+                    mft_starting_cluster * sectors_per_cluster * bytes_per_sector
+                )
 
-            self.mft_sectors = self.__getMFTSectors(file)
+                self.mft_sectors = self.__getMFTSectors(file)
+            except:
+                raise ValueError("[-] ERROR: Invalid MFT boot sector")
 
 
     def __unpack(self, data: bytes, byteorder="little", signed=False) -> int:
@@ -122,7 +125,7 @@ class Navigator:
         # The first 4 bytes of the MFT entry are the signature.  If the signature is not 'FILE', then
         # the MFT is corrupt.
         if raw_mft_entry[0:4] != b"FILE":
-            raise Exception("MFT is corrupt - signature is not 'FILE'.")
+            raise Exception("[-] ERROR: MFT is corrupt - signature is not 'FILE'.")
 
         mft_entry = self.__applyFixup(raw_mft_entry)
 
@@ -187,7 +190,7 @@ class Navigator:
 
             attr_start = attr_end
 
-        raise Exception("Attribute not found")
+        raise Exception(f"[-] ERROR: Attribute: 0x{attribute:02x} not found")
 
 
     def __parseFileNameAttribute(self, data: bytes) -> str:
@@ -247,12 +250,12 @@ class Navigator:
             reparse_attribute = self.__getRawAttribute(entry_bytes, 0xC0)
             reparse_data = self.__parseReparseAttribute(reparse_attribute)
         except:
-            raise Exception("File is not a reparse point")
+            raise Exception("[-] ERROR: File is not a reparse point")
 
         try:
             file_attribute = self.__getRawAttribute(entry_bytes, 0x30)
             reparse_data["file_name"] = self.__parseFileNameAttribute(file_attribute)
         except:
-            raise Exception("File name attribute not found")
+            raise Exception("[-] ERROR: File name attribute not found")
 
         return reparse_data
