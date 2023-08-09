@@ -7,7 +7,7 @@ current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
-from src.parsereparsepoint import Navigator
+from src.parse_reparsepoint import Navigator
 
 FILENAME = "..\\test_navigator.py"
 IMAGES = current + "/images/"
