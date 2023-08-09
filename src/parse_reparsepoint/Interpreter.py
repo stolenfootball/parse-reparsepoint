@@ -274,14 +274,14 @@ class Interpreter:
 
         try:
             return {
-                "Tag Value": f"0x{self.tag:08x}",
+                "Tag Value": f"0x{self.tag:08X}",
                 "Tag Identity": self.REPARSE_TAG_INFO[self.tag][0],
                 "Tag Desctiption": self.REPARSE_TAG_INFO[self.tag][1],
             }
 
         except KeyError:
             return {
-                "Tag Value": f"0x{self.tag:08x}",
+                "Tag Value": f"0x{self.tag:08X}",
                 "Tag Identity": "UNKNOWN",
                 "Tag Description": "No description available.",
             }
