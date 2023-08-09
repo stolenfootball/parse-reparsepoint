@@ -444,5 +444,6 @@ class Interpreter:
         buf = 25
 
         info = self.resolveAllInfo()
+        print("Gathered reparse info:")
         for key in info:
-            print(f"{key + ':' :<{buf}} {info[key]}")
+            print(f"[+] {key + ':' :<{buf}} {info[key]}")
