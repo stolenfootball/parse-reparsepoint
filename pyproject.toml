@@ -21,11 +21,7 @@ classifiers = [
 keywords = ["ntfs", "reparse point", "parse", "reparsepoint", "onedrive"]
 dependencies = [
     "argparse",
-    "re",
-    "string",
-    "typing",
-    "pathlib",
-    "os"
+    "typing"
 ]
 requires-python = ">=3.6.0"
 
@@ -57,4 +53,5 @@ push = true
     "{version}",
     "{pep440_version}",
 ]
+"scr/parse_reparsepoint/__init__.py" = ["{version}"]
 
