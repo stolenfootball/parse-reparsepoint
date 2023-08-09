@@ -34,7 +34,7 @@ class Navigator:
                     mft_starting_cluster * sectors_per_cluster * bytes_per_sector
                 )
 
-                self.mft_sectors = self.__getMFTSectors(file)
+                self.mft_clusters = self.__getMFTClusters(file)
             except:
                 raise ValueError("[-] ERROR: Invalid MFT boot sector")
 
@@ -84,7 +84,7 @@ class Navigator:
         :return:        A list of sectors that the file spans
         """
 
-        sector_list = []
+        cluster_list = []
         offset = 0
 
         # Continue processing until 0x00 is reached.  This marks the end of the runlist.
@@ -108,13 +108,13 @@ class Navigator:
 
             # Add the sectors in the current run to the list of sectors
             for i in range(length):
-                sector_list.append(offset + i)
+                cluster_list.append(offset + i)
             runlist = runlist[length_length + 1 + offset_length :]
 
-        return sector_list
+        return cluster_list
 
 
-    def __getMFTSectors(self, file: BinaryIO) -> list[int]:
+    def __getMFTClusters(self, file: BinaryIO) -> list[int]:
         """
         Gets the sectors that the MFT spans
 
@@ -156,7 +156,7 @@ class Navigator:
 
         # The cluster number the entry is in, and the byte offset of the entry in the cluster
         # print(entry, entries_per_cluster)
-        cluster_number = self.mft_sectors[entry // entries_per_cluster]
+        cluster_number = self.mft_clusters[entry // entries_per_cluster]
         cluster_offset = (entry % entries_per_cluster) * self.bytes_per_entry
 
         # The byte offset of the MFT entry from the beginning of the file
