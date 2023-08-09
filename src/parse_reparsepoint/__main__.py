@@ -1,8 +1,8 @@
 import argparse
 from pathlib import Path
 
-from Interpreter import Interpreter
-from Navigator import Navigator
+from parse_reparsepoint.Interpreter import Interpreter
+from parse_reparsepoint.Navigator import Navigator
 
 
 def main():
