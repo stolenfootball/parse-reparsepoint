@@ -297,6 +297,7 @@ class Interpreter:
         if self.tag & 0xFFFF0FFF != 0x9000001A:
             raise ValueError("[-] ERROR: Not a OneDrive reparse point")
 
+        # Check to see if it's a OneDrive Buisiness account.  These use GUIDs as CIDs
         try:
             guid_regex = "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
 
@@ -305,7 +306,11 @@ class Interpreter:
                 "OneDrive Account Type": "OneDrive Business",
             }
 
-        except ValueError:
+        except:
+            pass
+
+        # Check to see if it's a OneDrive Personal account.  These use 16 digit alphanum as CIDs.
+        try:
             pers_regex = "[0-9A-F]{16}!"
 
             return {
@@ -313,6 +318,7 @@ class Interpreter:
                 "OneDrive Account Type": "OneDrive Personal",
             }
 
+        # It's a OneDrive account, but doesn't match any known pattern
         except:
             return {
                 "OneDrive CID": "Unable to resolve OneDrive CID",
